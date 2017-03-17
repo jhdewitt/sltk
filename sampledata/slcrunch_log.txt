@@ -1,0 +1,328 @@
+$cd sampledata
+$slcrunch -c -vis -ply -procam procam_2016_12_09.yaml -o blah scan_0020/
+enable_coalesce
+PREFIX FOR OUTPUT : [scan_0020]
+outMapPath	scan_0020.yaml
+outVisCPath	scan_0020_rgb.png
+outVisXPath	scan_0020_x.png
+outVisYPath	scan_0020_y.png
+outVisDirPath	scan_0020_direct.png
+outVisAmbPath	scan_0020_indirect.png
+outVisChessCamPath	scan_0020_chesscam.png
+outVisChessProPath	scan_0020_chesspro.png
+outPlyPath	scan_0020_cloud.ply
+checking image list: scan_0020/
+Can't parse directory as string list..
+parsing [scan_0020/list.yaml]
+	prefix : [scan_0020]
+	fname  : [list.yaml]
+[scan_0020/1481302049.551275_[00-10-00_00]_img.jpg]
+[scan_0020/1481302051.228189_[00-10-01_01]_img.jpg]
+[scan_0020/1481302053.097507_[00-09-00_02]_img.jpg]
+[scan_0020/1481302054.693405_[00-09-01_03]_img.jpg]
+[scan_0020/1481302056.432740_[00-08-00_04]_img.jpg]
+[scan_0020/1481302058.218591_[00-08-01_05]_img.jpg]
+[scan_0020/1481302059.821438_[00-07-00_06]_img.jpg]
+[scan_0020/1481302061.644733_[00-07-01_07]_img.jpg]
+[scan_0020/1481302063.349134_[00-06-00_08]_img.jpg]
+[scan_0020/1481302065.111192_[00-06-01_09]_img.jpg]
+[scan_0020/1481302066.921491_[00-05-00_10]_img.jpg]
+[scan_0020/1481302068.727864_[00-05-01_11]_img.jpg]
+[scan_0020/1481302070.440745_[00-04-00_12]_img.jpg]
+[scan_0020/1481302072.160886_[00-04-01_13]_img.jpg]
+[scan_0020/1481302073.928258_[00-03-00_14]_img.jpg]
+[scan_0020/1481302075.812690_[00-03-01_15]_img.jpg]
+[scan_0020/1481302077.992064_[00-02-00_16]_img.jpg]
+[scan_0020/1481302080.107783_[00-02-01_17]_img.jpg]
+[scan_0020/1481302082.201916_[00-01-00_18]_img.jpg]
+[scan_0020/1481302084.359588_[00-01-01_19]_img.jpg]
+[scan_0020/1481302086.477428_[00-00-00_20]_img.jpg]
+[scan_0020/1481302088.519775_[00-00-01_21]_img.jpg]
+[scan_0020/1481302090.241762_[01-10-00_22]_img.jpg]
+[scan_0020/1481302091.783343_[01-10-01_23]_img.jpg]
+[scan_0020/1481302093.856558_[01-09-00_24]_img.jpg]
+[scan_0020/1481302095.419883_[01-09-01_25]_img.jpg]
+[scan_0020/1481302097.134070_[01-08-00_26]_img.jpg]
+[scan_0020/1481302098.811209_[01-08-01_27]_img.jpg]
+[scan_0020/1481302100.474787_[01-07-00_28]_img.jpg]
+[scan_0020/1481302101.993313_[01-07-01_29]_img.jpg]
+[scan_0020/1481302103.591916_[01-06-00_30]_img.jpg]
+[scan_0020/1481302105.259782_[01-06-01_31]_img.jpg]
+[scan_0020/1481302106.943372_[01-05-00_32]_img.jpg]
+[scan_0020/1481302108.550672_[01-05-01_33]_img.jpg]
+[scan_0020/1481302110.310776_[01-04-00_34]_img.jpg]
+[scan_0020/1481302112.068761_[01-04-01_35]_img.jpg]
+[scan_0020/1481302114.069967_[01-03-00_36]_img.jpg]
+[scan_0020/1481302115.951540_[01-03-01_37]_img.jpg]
+[scan_0020/1481302118.111106_[01-02-00_38]_img.jpg]
+[scan_0020/1481302120.067323_[01-02-01_39]_img.jpg]
+[scan_0020/1481302122.272422_[01-01-00_40]_img.jpg]
+[scan_0020/1481302124.524852_[01-01-01_41]_img.jpg]
+[scan_0020/1481302126.814440_[01-00-00_42]_img.jpg]
+[scan_0020/1481302128.658200_[01-00-01_43]_img.jpg]
+Using image list: scan_0020/list.yaml
+loading exif data..
+done!
+---------------------
+show inverse: √
+show x-axis:  √
+show y-axis:  √
+bits:   11 (2^11 = 2048)
+mult:    4
+images: 44
+---------------------
+image size = 2592 x 1944
+threshold = 5
+---------------------
+completed bitfields: 
+[ 0] MERGING NEW X BITFIELD : [bitfield 10] [minbit 0] [diff = 53.392] [ 0] MERGING NEW Y BITFIELD : [bitfield 10] [minbit 0] [diff = 52.909]
+[ 1] MERGING NEW X BITFIELD : [bitfield  9] [minbit 0] [diff = 52.097] [ 1] MERGING NEW Y BITFIELD : [bitfield  9] [minbit 0] [diff = 54.904]
+[ 2] MERGING NEW X BITFIELD : [bitfield  8] [minbit 0] [diff = 54.637] [ 2] MERGING NEW Y BITFIELD : [bitfield  8] [minbit 0] [diff = 52.548]
+[ 3] MERGING NEW X BITFIELD : [bitfield  7] [minbit 0] [diff = 53.692] [ 3] MERGING NEW Y BITFIELD : [bitfield  7] [minbit 0] [diff = 53.485]
+[ 4] MERGING NEW X BITFIELD : [bitfield  6] [minbit 0] [diff = 52.259] [ 4] MERGING NEW Y BITFIELD : [bitfield  6] [minbit 0] [diff = 51.937]
+[ 5] MERGING NEW X BITFIELD : [bitfield  5] [minbit 0] [diff = 50.629] [ 5] MERGING NEW Y BITFIELD : [bitfield  5] [minbit 0] [diff = 51.244]
+[ 6] MERGING NEW X BITFIELD : [bitfield  4] [minbit 0] [diff = 48.514] [ 6] MERGING NEW Y BITFIELD : [bitfield  4] [minbit 0] [diff = 49.352]
+[ 7] MERGING NEW X BITFIELD : [bitfield  3] [minbit 0] [diff = 44.481] [ 7] MERGING NEW Y BITFIELD : [bitfield  3] [minbit 0] [diff = 45.593]
+[ 8] MERGING NEW X BITFIELD : [bitfield  2] [minbit 0] [diff = 37.933] [ 8] MERGING NEW Y BITFIELD : [bitfield  2] [minbit 0] [diff = 39.549]
+[ 9] MERGING NEW X BITFIELD : [bitfield  1] [minbit 0] [diff = 28.737] [ 9] MERGING NEW Y BITFIELD : [bitfield  1] [minbit 0] [diff = 30.467]
+[10] MERGING NEW X BITFIELD : [bitfield  0] [minbit 0] [diff = 15.861] [10] MERGING NEW Y BITFIELD : [bitfield  0] [minbit 0] [diff = 12.059]
+
+camera_points.size() = 157340
+camera_points_rgb() = 157340
+coalesce pass..
+object size: [1280, 720]
+camera_points has        157340 elements
+projector_points has     157340 elements
+camera_points_avg has    104809 elements
+projector_points_avg has 104809 elements
+projector space has     ~921600 elements
+coverage is 11.37%
+total pixels: (  5038848 px )
+   x decoded: (   292383 px =   5.80% ) range: [34,1279] w = 1246
+   y decoded: (   253084 px =   5.02% ) range: [0,719] h =  720
+coverage details ----
+     [               x                ] [               y                ]
+ bit [    decoded     fill%  avg diff ] [    decoded     fill%  avg diff ] bit
+[ 0] [        0 px    0.00%      nan  ] [        0 px    0.00%      nan  ] [ 0]
+[ 1] [        0 px    0.00%      nan  ] [        0 px    0.00%      nan  ] [ 1]
+[ 2] [        0 px    0.00%      nan  ] [        0 px    0.00%      nan  ] [ 2]
+[ 3] [        0 px    0.00%      nan  ] [        0 px    0.00%      nan  ] [ 3]
+[ 4] [        0 px    0.00%      nan  ] [        0 px    0.00%      nan  ] [ 4]
+[ 5] [        0 px    0.00%      nan  ] [        0 px    0.00%      nan  ] [ 5]
+[ 6] [        0 px    0.00%      nan  ] [        0 px    0.00%      nan  ] [ 6]
+[ 7] [        0 px    0.00%      nan  ] [        0 px    0.00%      nan  ] [ 7]
+[ 8] [        0 px    0.00%      nan  ] [        0 px    0.00%      nan  ] [ 8]
+[ 9] [        0 px    0.00%      nan  ] [        0 px    0.00%      nan  ] [ 9]
+[10] [        0 px    0.00%      nan  ] [        0 px    0.00%      nan  ] [10]
+---------------------
+ 157340 total points = 3.12%
+ 104809 total points = 2.08% (66.61%) (coalesced)
+writing rgb vis image: scan_0020_rgb.png
+writing x-axis vis image: scan_0020_x.png
+writing y-axis vis image: scan_0020_y.png
+saving ply file..
+cam_R = [-0.01278299520554846;
+  0.7290894077914141;
+  -0.004803937572474239]
+pro_R = [0.01256265549350217;
+  0.3188367731484797;
+  -0.1221166094729608]
+campro_R = [-0.06708764324743538;
+  0.4085358853489671;
+  0.1032462023854666]
+ROT : [4x4][0.7457742890945772, -0.008846460763070925, -0.6661399626635873, 0;
+  -6.774078369130299e-05, 0.9999108178825701, -0.01335483779744521, 0;
+  0.6661986979397846, 0.01000481950748201, 0.7457071800981658, 0;
+  0, 0, 0, 1]
+cam_P : [4 x 3]
+[1645.100969026551, 0, 187.8969402313232, 0;
+  0, 1645.100969026551, 1117.524396419525, 0;
+  0, 0, 1, 0]
+
+pro_P : [4 x 3]
+[1645.100969026551, 0, 187.8969402313232, -319956.0756774122;
+  0, 1645.100969026551, 1117.524396419525, 0;
+  0, 0, 1, 0]
+
+[439.488, -117.274, 361.157, 1] : [88.2151, -122.117, 560.93, 1]
+[439.387, -117.149, 359.249, 1] : [89.4098, -121.966, 559.442, 1]
+[441.204, -117.329, 358.395, 1] : [91.335, -122.134, 560.013, 1]
+[450.286, -116.526, 345.12, 1] : [106.944, -121.155, 556.173, 1]
+[453.008, -116.782, 344.176, 1] : [109.605, -121.399, 557.279, 1]
+[458.202, -116.922, 339.3, 1] : [116.728, -121.474, 557.102, 1]
+[457.915, -116.501, 336.849, 1] : [118.144, -121.02, 555.088, 1]
+[427.694, -119.499, 384.894, 1] : [63.6271, -124.658, 570.752, 1]
+[430.734, -119.111, 379.528, 1] : [69.4654, -124.198, 568.779, 1]
+[432.126, -119.075, 377.899, 1] : [71.5879, -124.141, 568.493, 1]
+r,g,b avg = 20329700.0000, 12761354.0000, 10666181.0000
+***********************************
+camera_points_rgb_avg.size = 104809
+rgbPoints.size = 104809
+***********************************
+writing PLY file: [scan_0020_cloud.ply] [104809 points]
+
+
+
+
+
+$slcrunch -c -vis -ply -procam procam_2016_12_09.yaml -o blah scan_0021/
+enable_coalesce
+PREFIX FOR OUTPUT : [scan_0021]
+outMapPath	scan_0021.yaml
+outVisCPath	scan_0021_rgb.png
+outVisXPath	scan_0021_x.png
+outVisYPath	scan_0021_y.png
+outVisDirPath	scan_0021_direct.png
+outVisAmbPath	scan_0021_indirect.png
+outVisChessCamPath	scan_0021_chesscam.png
+outVisChessProPath	scan_0021_chesspro.png
+outPlyPath	scan_0021_cloud.ply
+checking image list: scan_0021/
+Can't parse directory as string list..
+parsing [scan_0021/list.yaml]
+	prefix : [scan_0021]
+	fname  : [list.yaml]
+[scan_0021/1481302134.569065_[00-10-00_00]_img.jpg]
+[scan_0021/1481302136.260798_[00-10-01_01]_img.jpg]
+[scan_0021/1481302137.958477_[00-09-00_02]_img.jpg]
+[scan_0021/1481302139.667311_[00-09-01_03]_img.jpg]
+[scan_0021/1481302141.382543_[00-08-00_04]_img.jpg]
+[scan_0021/1481302142.909362_[00-08-01_05]_img.jpg]
+[scan_0021/1481302144.507198_[00-07-00_06]_img.jpg]
+[scan_0021/1481302146.247567_[00-07-01_07]_img.jpg]
+[scan_0021/1481302147.954800_[00-06-00_08]_img.jpg]
+[scan_0021/1481302149.510018_[00-06-01_09]_img.jpg]
+[scan_0021/1481302151.089475_[00-05-00_10]_img.jpg]
+[scan_0021/1481302152.776329_[00-05-01_11]_img.jpg]
+[scan_0021/1481302154.489242_[00-04-00_12]_img.jpg]
+[scan_0021/1481302156.228349_[00-04-01_13]_img.jpg]
+[scan_0021/1481302158.227796_[00-03-00_14]_img.jpg]
+[scan_0021/1481302160.113026_[00-03-01_15]_img.jpg]
+[scan_0021/1481302162.296677_[00-02-00_16]_img.jpg]
+[scan_0021/1481302164.419688_[00-02-01_17]_img.jpg]
+[scan_0021/1481302166.686413_[00-01-00_18]_img.jpg]
+[scan_0021/1481302168.889501_[00-01-01_19]_img.jpg]
+[scan_0021/1481302171.227893_[00-00-00_20]_img.jpg]
+[scan_0021/1481302173.311780_[00-00-01_21]_img.jpg]
+[scan_0021/1481302175.124420_[01-10-00_22]_img.jpg]
+[scan_0021/1481302176.999838_[01-10-01_23]_img.jpg]
+[scan_0021/1481302179.068261_[01-09-00_24]_img.jpg]
+[scan_0021/1481302180.736684_[01-09-01_25]_img.jpg]
+[scan_0021/1481302182.607842_[01-08-00_26]_img.jpg]
+[scan_0021/1481302184.409653_[01-08-01_27]_img.jpg]
+[scan_0021/1481302186.183244_[01-07-00_28]_img.jpg]
+[scan_0021/1481302188.097698_[01-07-01_29]_img.jpg]
+[scan_0021/1481302189.663182_[01-06-00_30]_img.jpg]
+[scan_0021/1481302191.427853_[01-06-01_31]_img.jpg]
+[scan_0021/1481302193.053982_[01-05-00_32]_img.jpg]
+[scan_0021/1481302194.826318_[01-05-01_33]_img.jpg]
+[scan_0021/1481302196.498860_[01-04-00_34]_img.jpg]
+[scan_0021/1481302198.243962_[01-04-01_35]_img.jpg]
+[scan_0021/1481302200.161184_[01-03-00_36]_img.jpg]
+[scan_0021/1481302202.135805_[01-03-01_37]_img.jpg]
+[scan_0021/1481302204.286687_[01-02-00_38]_img.jpg]
+[scan_0021/1481302206.559777_[01-02-01_39]_img.jpg]
+[scan_0021/1481302208.680940_[01-01-00_40]_img.jpg]
+[scan_0021/1481302210.667195_[01-01-01_41]_img.jpg]
+[scan_0021/1481302213.082432_[01-00-00_42]_img.jpg]
+[scan_0021/1481302214.992067_[01-00-01_43]_img.jpg]
+Using image list: scan_0021/list.yaml
+loading exif data..
+done!
+---------------------
+show inverse: √
+show x-axis:  √
+show y-axis:  √
+bits:   11 (2^11 = 2048)
+mult:    4
+images: 44
+---------------------
+image size = 2592 x 1944
+threshold = 5
+---------------------
+completed bitfields: 
+[ 0] MERGING NEW X BITFIELD : [bitfield 10] [minbit 0] [diff = 52.866] [ 0] MERGING NEW Y BITFIELD : [bitfield 10] [minbit 0] [diff = 52.262]
+[ 1] MERGING NEW X BITFIELD : [bitfield  9] [minbit 0] [diff = 51.582] [ 1] MERGING NEW Y BITFIELD : [bitfield  9] [minbit 0] [diff = 54.567]
+[ 2] MERGING NEW X BITFIELD : [bitfield  8] [minbit 0] [diff = 53.923] [ 2] MERGING NEW Y BITFIELD : [bitfield  8] [minbit 0] [diff = 51.831]
+[ 3] MERGING NEW X BITFIELD : [bitfield  7] [minbit 0] [diff = 53.021] [ 3] MERGING NEW Y BITFIELD : [bitfield  7] [minbit 0] [diff = 53.080]
+[ 4] MERGING NEW X BITFIELD : [bitfield  6] [minbit 0] [diff = 51.906] [ 4] MERGING NEW Y BITFIELD : [bitfield  6] [minbit 0] [diff = 51.809]
+[ 5] MERGING NEW X BITFIELD : [bitfield  5] [minbit 0] [diff = 49.903] [ 5] MERGING NEW Y BITFIELD : [bitfield  5] [minbit 0] [diff = 50.792]
+[ 6] MERGING NEW X BITFIELD : [bitfield  4] [minbit 0] [diff = 47.844] [ 6] MERGING NEW Y BITFIELD : [bitfield  4] [minbit 0] [diff = 49.031]
+[ 7] MERGING NEW X BITFIELD : [bitfield  3] [minbit 0] [diff = 43.990] [ 7] MERGING NEW Y BITFIELD : [bitfield  3] [minbit 0] [diff = 45.302]
+[ 8] MERGING NEW X BITFIELD : [bitfield  2] [minbit 0] [diff = 37.527] [ 8] MERGING NEW Y BITFIELD : [bitfield  2] [minbit 0] [diff = 39.313]
+[ 9] MERGING NEW X BITFIELD : [bitfield  1] [minbit 0] [diff = 28.443] [ 9] MERGING NEW Y BITFIELD : [bitfield  1] [minbit 0] [diff = 30.260]
+[10] MERGING NEW X BITFIELD : [bitfield  0] [minbit 0] [diff = 15.935] [10] MERGING NEW Y BITFIELD : [bitfield  0] [minbit 0] [diff = 12.027]
+
+camera_points.size() = 156206
+camera_points_rgb() = 156206
+coalesce pass..
+object size: [1280, 720]
+camera_points has        156206 elements
+projector_points has     156206 elements
+camera_points_avg has    101942 elements
+projector_points_avg has 101942 elements
+projector space has     ~921600 elements
+coverage is 11.06%
+total pixels: (  5038848 px )
+   x decoded: (   292800 px =   5.81% ) range: [30,1279] w = 1250
+   y decoded: (   251090 px =   4.98% ) range: [0,719] h =  720
+coverage details ----
+     [               x                ] [               y                ]
+ bit [    decoded     fill%  avg diff ] [    decoded     fill%  avg diff ] bit
+[ 0] [        0 px    0.00%      nan  ] [        0 px    0.00%      nan  ] [ 0]
+[ 1] [        0 px    0.00%      nan  ] [        0 px    0.00%      nan  ] [ 1]
+[ 2] [        0 px    0.00%      nan  ] [        0 px    0.00%      nan  ] [ 2]
+[ 3] [        0 px    0.00%      nan  ] [        0 px    0.00%      nan  ] [ 3]
+[ 4] [        0 px    0.00%      nan  ] [        0 px    0.00%      nan  ] [ 4]
+[ 5] [        0 px    0.00%      nan  ] [        0 px    0.00%      nan  ] [ 5]
+[ 6] [        0 px    0.00%      nan  ] [        0 px    0.00%      nan  ] [ 6]
+[ 7] [        0 px    0.00%      nan  ] [        0 px    0.00%      nan  ] [ 7]
+[ 8] [        0 px    0.00%      nan  ] [        0 px    0.00%      nan  ] [ 8]
+[ 9] [        0 px    0.00%      nan  ] [        0 px    0.00%      nan  ] [ 9]
+[10] [        0 px    0.00%      nan  ] [        0 px    0.00%      nan  ] [10]
+---------------------
+ 156206 total points = 3.10%
+ 101942 total points = 2.02% (65.26%) (coalesced)
+writing rgb vis image: scan_0021_rgb.png
+writing x-axis vis image: scan_0021_x.png
+writing y-axis vis image: scan_0021_y.png
+saving ply file..
+cam_R = [-0.01278299520554846;
+  0.7290894077914141;
+  -0.004803937572474239]
+pro_R = [0.01256265549350217;
+  0.3188367731484797;
+  -0.1221166094729608]
+campro_R = [-0.06708764324743538;
+  0.4085358853489671;
+  0.1032462023854666]
+ROT : [4x4][0.7457742890945772, -0.008846460763070925, -0.6661399626635873, 0;
+  -6.774078369130299e-05, 0.9999108178825701, -0.01335483779744521, 0;
+  0.6661986979397846, 0.01000481950748201, 0.7457071800981658, 0;
+  0, 0, 0, 1]
+cam_P : [4 x 3]
+[1645.100969026551, 0, 187.8969402313232, 0;
+  0, 1645.100969026551, 1117.524396419525, 0;
+  0, 0, 1, 0]
+
+pro_P : [4 x 3]
+[1645.100969026551, 0, 187.8969402313232, -319956.0756774122;
+  0, 1645.100969026551, 1117.524396419525, 0;
+  0, 0, 1, 0]
+
+[436.209, -117.279, 363.406, 1] : [84.2717, -122.151, 560.423, 1]
+[440.524, -117.067, 357.844, 1] : [91.1932, -121.865, 559.152, 1]
+[443.752, -116.796, 352.972, 1] : [96.8427, -121.53, 557.672, 1]
+[452.69, -116.387, 341.675, 1] : [111.031, -120.97, 555.206, 1]
+[454.445, -116.639, 341.495, 1] : [112.461, -121.22, 556.239, 1]
+[459.677, -116.561, 334.918, 1] : [120.744, -121.055, 554.821, 1]
+[462.204, -116.693, 333.047, 1] : [123.876, -121.162, 555.108, 1]
+[435.79, -118.458, 371.382, 1] : [78.6565, -123.437, 566.08, 1]
+[436.842, -118.729, 371.609, 1] : [79.2918, -123.711, 566.947, 1]
+[436.168, -116.85, 362.85, 1] : [84.6073, -121.715, 559.985, 1]
+r,g,b avg = 19742274.0000, 12392401.0000, 10384620.0000
+***********************************
+camera_points_rgb_avg.size = 101942
+rgbPoints.size = 101942
+***********************************
+writing PLY file: [scan_0021_cloud.ply] [101942 points]
