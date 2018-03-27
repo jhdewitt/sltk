@@ -13,7 +13,6 @@ double curtime(){
     return ret;
 }
 
-#ifdef __APPLE__
 
 bool is_dir(const char *filename)
 {
@@ -29,7 +28,6 @@ bool is_dir(const char *filename)
    }
    return false;
 }
-#endif
 
 bool file_exists(const char * filename) {
     FILE *file = fopen(filename, "r");
