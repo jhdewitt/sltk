@@ -4,6 +4,9 @@
 #include <sys/time.h>
 #include <vector>
 #include <iostream>
+#include <cstdio>
+#include <cstring>
+#include <cstdlib>
 
 #include <sys/types.h>
 #include <sys/stat.h>
