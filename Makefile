@@ -64,7 +64,7 @@ slturn: bin slturn.cpp hid.o
 	$(CC) $(CFLAGS) $(CLIB) $(SYSARG) $(HID) $(FLAGS_OSC) slturn.cpp -o bin/slturn
 
 sldisp: bin sldisp.cpp util.o
-	$(CC) $(CFLAGS) $(CLIB) $(FLAGS_GL) $(FLAGS_SDL) $(FLAGS_OSC) sldisp.cpp util.cpp -o bin/sldisp
+	$(CC) $(CFLAGS) $(CLIB) $(FLAGS_GL) sldisp.cpp util.cpp -o bin/sldisp $(FLAGS_SDL) $(FLAGS_OSC)
 
 slcrunch: bin slcrunch.cpp util.o sl_util.o
 	$(CC) $(CFLAGS) $(CLIB) $(FLAGS_OPENCV) slcrunch.cpp util.cpp sl_util.cpp -o bin/slcrunch
