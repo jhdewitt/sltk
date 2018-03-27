@@ -10,8 +10,8 @@
 # sldisp.cpp
 # slturn.cpp
 
-#OS = LINUX
-OS = MACOSX
+OS = LINUX
+#OS = MACOSX
 #OS = WINDOWS
 
 CC=g++
@@ -52,7 +52,7 @@ else
     endif
 endif
 
-all: slturn sldisp slcrunch slcalibrate plotlens plyalign plytrim chessgen chessfind listcreator  
+all: sldisp slcrunch slcalibrate plotlens plyalign plytrim chessgen chessfind listcreator  
 
 bin:
 	@mkdir -p bin
@@ -90,7 +90,8 @@ chessfind: bin chessfind.cpp util.o
 listcreator: bin listcreator.cpp
 	$(CC) $(CFLAGS) $(CLIB) $(FLAGS_OPENCV) listcreator.cpp -o bin/listcreator
 
-hid.o: hid_$(OS).c hid.h
+#hid.o: hid_$(OS).c hid.h
+hid.o: $(HID) hid.h
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 util.o: util.cpp util.h
