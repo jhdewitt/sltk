@@ -52,7 +52,10 @@ else
     endif
 endif
 
-all: sldisp slcrunch slcalibrate plotlens plyalign plytrim chessgen chessfind listcreator  
+process_tools: slcrunch slcalibrate plotlens plyalign plytrim chessgen chessfind listcreator
+capture_tools: sldisp
+
+all: process_tools capture_tools
 
 bin:
 	@mkdir -p bin
