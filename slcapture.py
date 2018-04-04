@@ -431,7 +431,7 @@ def each_frame():
         desired_bytes = ts.img_size_last
     #desired_bytes = int(max(desired_bytes*0.5,12800))
     #desired_bytes = 32000
-    desired_bytes = int(min(max(desired_bytes*0.85,12800),12800*8))
+    desired_bytes = int(min(max(desired_bytes*0.95,12800),12800*50))
     
     bytes+=stream.read(desired_bytes)
     #bytes+=stream.read(81920*4)

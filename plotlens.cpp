@@ -100,8 +100,8 @@ int main( int argc, char** argv ){
    
    float squareSize = 1.f;
    int n=0;
-   
    const char* outVisFN = findNextName( "lensplot_%04d.png",&n);
+   const char* outGridFN = findNextName( "lensgrid_%04d.png",&n);
    const char* inCalibFN  = 0;
    
    bool use_args = false;
@@ -110,6 +110,9 @@ int main( int argc, char** argv ){
    Vec2f principal_pt(0,0);
    Vec4f distortion_coeff(1,0,0,0);
    
+   int isolines_num = 50;
+   float isolines_scale = 1;
+
    bool use_cam = true;
    bool use_pro = false;
    
@@ -133,6 +136,20 @@ int main( int argc, char** argv ){
       {
          help();
          return 1;
+      }
+      else if( strcmp(s,"-isoscale") == 0 )
+      {
+         float v = 0;
+         if( sscanf( argv[++i], "%f", &v ) != 1 || v <= 0 )
+            return fprintf( stderr, "Invalid isoline scale/increment\n" ), -1;
+         isolines_scale = v;
+      }
+      else if( strcmp(s,"-isolines") == 0 )
+      {
+         int v = 0;
+         if( sscanf( argv[++i], "%d", &v ) != 1 || v <= 0 )
+            return fprintf( stderr, "Invalid isoline count\n" ), -1;
+         isolines_num = v;
       }
       else if( strcmp(s,"-show") == 0 )
       {
@@ -431,16 +448,17 @@ int main( int argc, char** argv ){
    Mat thresh_diffmat;
    Mat thresh_img(dat_h,dat_w,CV_8UC1);
    
-   int isoline_N = 100;
-   for(int i=1; i<isoline_N; i++)
+   for(int i=1; i<isolines_num+1; i++)
    {
       float max_level = mdiff_max;
+      float v = i; //(float)(isolines_num-1);
 //      max_level = mag_mean;
-      float v = i/(float)(isoline_N-1);
 //      v = pow(v,2.0);
+      //float level = max_level*v;
+      float level = isolines_scale*v;
       
-      float level = max_level*v;
-//      cout << level << endl;
+      printf("level [%2d] = %0.3f\n",i,level);
+
       threshold(diffmat, thresh_diffmat, level, 255, THRESH_BINARY);
       for(int r=0; r<diffmat.rows; r++)
       {
@@ -537,6 +555,30 @@ int main( int argc, char** argv ){
    resize( img, disp, Size(), ratio, ratio, INTER_AREA );
    
    
+   bool gen_grid = true;
+
+   Mat grid_img(dat_h,dat_w,CV_8UC3,Scalar::all(32));
+   // generate grid image distorted with lens (simulated image of grid)
+   if( gen_grid )
+   {
+        
+        int w = grid_img.cols;
+        int h = grid_img.rows;
+        for(int r=0; r<h; r++)
+        {
+             uchar* pixb = grid_img.ptr<unsigned char>(r);
+             for(int c=0; c<w; c++)
+             {
+                int idx = 3*(r*w+c);
+                unsigned char v = 255;
+                pixb[idx+0] = v;
+                pixb[idx+1] = v;
+                pixb[idx+2] = v;
+             }
+        }
+    
+   }
+
    if( plot_display )
    {
       imshow("disp",disp);
@@ -545,6 +587,7 @@ int main( int argc, char** argv ){
    if( plot_save )
    {
       imwrite(string(outVisFN),img);
+      imwrite(string(outGridFN),grid_img);
    }
    
    return 0;

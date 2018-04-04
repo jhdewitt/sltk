@@ -327,8 +327,8 @@ double AlignICP(const PointCloudT::Ptr cloud_ref, const PointCloudT::Ptr cloud_d
     
     icp.setRANSACIterations(150);
     icp.setMaximumIterations(1000);
-    icp.setTransformationEpsilon(1e-5);
-    icp.setEuclideanFitnessEpsilon(5e-5);
+    icp.setTransformationEpsilon(1e-3);
+    icp.setEuclideanFitnessEpsilon(5e-3);
     
     icp.setMaxCorrespondenceDistance(inlier_t);
     icp.setRANSACOutlierRejectionThreshold(10);
