@@ -92,9 +92,20 @@ int main( int argc, char** argv ){
    bool enable_stereo = false;
    bool enable_zerotan = false;
    bool only_fundamental = false;
+   bool enable_fundamental_matrix = true;
 
-   bool use_cam_guess = false;
-   bool use_pro_guess = false;
+   bool cam_fix_pp = false; // fix principal point
+   bool cam_fix_k1 = false; // fix distortion coefficients
+   bool cam_fix_k2 = false;
+   bool cam_fix_k3 = false;
+   bool cam_fix_k4 = false;
+   bool cam_fix_k5 = false;
+   bool cam_fix_k6 = false;
+   
+   bool cam_use_guess = false;
+   bool pro_use_guess = false;
+   bool cam_use_guess_only = false;
+   bool pro_use_guess_only = false;
    bool no_cam_load = false;
    bool no_pro_load = false;
 
@@ -127,17 +138,53 @@ int main( int argc, char** argv ){
          if( sscanf( argv[++i], "%f", &squareSize ) != 1 || squareSize <= 0 )
             return fprintf( stderr, "Invalid pattern square width\n" ), -1;
       }
+      else if( strcmp(s,"-pp") == 0 )
+      {
+         cam_fix_pp = true;
+      }
+      else if( strcmp(s,"-k1") == 0 )
+      {
+         cam_fix_k1 = true;
+      }
+      else if( strcmp(s,"-k2") == 0 )
+      {
+         cam_fix_k2 = true;
+      }
+      else if( strcmp(s,"-k3") == 0 )
+      {
+         cam_fix_k3 = true;
+      }
+      else if( strcmp(s,"-k4") == 0 )
+      {
+         cam_fix_k4 = true;
+      }
+      else if( strcmp(s,"-k5") == 0 )
+      {
+         cam_fix_k5 = true;
+      }
+      else if( strcmp(s,"-k6") == 0 )
+      {
+         cam_fix_k6 = true;
+      }
       else if( strcmp(s,"-rational") == 0 )
       {
          enable_rational_model = true;
       }
       else if( strcmp(s,"-camguess") == 0 )
       {
-         use_cam_guess = true;
+         cam_use_guess = true;
       }
       else if( strcmp(s,"-proguess") == 0 )
       {
-         use_pro_guess = true;
+         pro_use_guess = true;
+      }
+      else if( strcmp(s,"-camfinal") == 0 )
+      {
+         cam_use_guess_only = true;
+      }
+      else if( strcmp(s,"-profinal") == 0 )
+      {
+         pro_use_guess_only = true;
       }
       else if( strcmp(s,"-nocam") == 0 )
       {
@@ -165,6 +212,10 @@ int main( int argc, char** argv ){
       else if( strcmp(s,"-nostereo") == 0 )
       {
          enable_stereo = false;
+      }
+      else if( strcmp(s,"-nofundamental") == 0 )
+      {
+         enable_fundamental_matrix = false;
       }
       else if( strcmp(s,"-zerotan") == 0 )
       {
@@ -256,6 +307,8 @@ int main( int argc, char** argv ){
 
    // load points from each file
    // scanList
+   int tot_points = 0;
+   float t_load_start = curtime();
    for (int i=0; i<scanList.size(); i++)
    {
       // PER FILE
@@ -338,7 +391,7 @@ int main( int argc, char** argv ){
       
       // confirm all projector sizes are the same
       Size2i pro_size;
-      printf("confirm all projector sizes are the same..");
+      //printf("confirm all projector sizes are the same..");
       fflush(stdout);
       if( pro_dims.data )
       {
@@ -355,7 +408,7 @@ int main( int argc, char** argv ){
             CV_Assert( pro_size.height == base_pro_size.height );
          }
       }
-      printf("done\n");
+      //printf("done\n");
       
       // copy 2d correspondence mat to 3d vector
       //vector< Point2f > vec_cam_matches; //(cam_points.begin<Point2f>(), cam_points.end<Point2f>());
@@ -378,7 +431,7 @@ int main( int argc, char** argv ){
       
       //vector< Point3f > vec_obj_matches;
       //vector< Point2f > vec_obj_matches2d;
-      printf("copying 2d decoded points into 3d vector");
+      //printf("copying 2d decoded points into 3d vector");
       fflush(stdout);
       if( !enable_chess )
       {
@@ -401,7 +454,7 @@ int main( int argc, char** argv ){
             }
          }
       }
-      printf("done\n");
+      //printf("done\n");
       CV_Assert( vec_obj_matches.size() == vec_cam_matches.size() );
       
       // add onto vector
@@ -435,14 +488,20 @@ int main( int argc, char** argv ){
          used_points = obj_points.rows;
       }
       
-      printf("loaded : (%4d x %4d) [%s; %s; %s; %s/%s] %8d points [%s]\n",
+             //cam_make.c_str(), cam_model.c_str(), cam_lens.c_str(),
+             //cam_serial.c_str(), cam_intserial.c_str(),
+             
+      printf("loaded correspondence frame : (%4d x %4d) %8d points [%s]\n",
              (int)cam_size.width,(int)cam_size.height,
-             cam_make.c_str(), cam_model.c_str(), cam_lens.c_str(),
-             cam_serial.c_str(), cam_intserial.c_str(),
              used_points,  scanList[i].c_str());
+
+      tot_points += used_points;
       
       // end data loading
    }
+   double t_load_end = curtime();
+   double t_load_tot = fmax(abs(t_load_end-t_load_start),0.01);
+   printf("loading took %0.1f seconds for %d files (~%0.1f files/s)\n",t_load_tot,(int)scanList.size(),scanList.size()/t_load_tot); 
    
    cout << "pro_size = " << base_pro_size << endl;
    
@@ -465,6 +524,8 @@ int main( int argc, char** argv ){
    printf("* finished loading points *\n");
    printf("---------------------------\n");
    printf("total scans: %d\n", (int)pro_point_list.size() );
+   printf("total points: %d (%0.2e)\n", (int)tot_points, (float)tot_points );
+   
    // ----------------------------------------------------------------------
    
    // begin calibration
@@ -618,6 +679,7 @@ int main( int argc, char** argv ){
    // compute camera-projector stereo calibration
    if( only_fundamental)
    {
+      printf("[fundamental only mode]\n");
       vector<Point2f> cam_pt0(vec_cam_matches.begin(),vec_cam_matches.end());//(vec_cam_matches);
       vector<Point2f> obj_pt0(vec_obj_matches2d.begin(),vec_obj_matches2d.end());//(vec_obj_matches2d);
       vector<Point2f> cam_pt1(vec_cam_matches.begin(),vec_cam_matches.end());//(vec_cam_matches);
@@ -669,15 +731,16 @@ int main( int argc, char** argv ){
    }
    else if( enable_chess )
    {
+      printf("[procam+chess calib mode]\n");
       // if no camera calibration, calculate it
-      if( cam_calib_loaded && !use_cam_guess )
+      if( cam_calib_loaded && !cam_use_guess )
       {
          cam_error = cam_rms;
       }
       else
       {
          int cam_flags = def_flags;
-         if( use_cam_guess )
+         if( cam_use_guess )
          {
             cam_flags |= CALIB_USE_INTRINSIC_GUESS;
          }
@@ -691,24 +754,33 @@ int main( int argc, char** argv ){
          if( enable_rational_model )
             cam_flags |= CALIB_RATIONAL_MODEL;
 
+         double t0 = curtime();
+         if(!cam_use_guess_only)
          cam_error = calibrateCamera(object_corners, camera_corners,
                                      base_cam_size, cam_K, cam_kc,
                                      cam_rvecs, cam_tvecs,
                                      cam_flags, def_tc);
-         
-         printf("cam rms = %f\n",cam_error);
+         double t1 = curtime();
+
+
+         int obj_pt_n = 0;
+         for (int i=0;i<object_corners.size();i++)
+         {
+             obj_pt_n += object_corners[i].size();
+         }
+         printf("cam rms = %f (took %0.1f seconds) (%d points processed @ ~%0.1f pt/s)\n",cam_error,abs(t1-t0),obj_pt_n,obj_pt_n/fmax(abs(t1-t0),0.01));
          
       }
       
       // if no projector calibration, calculate it
-      if( pro_calib_loaded && !use_pro_guess )
+      if( pro_calib_loaded && !pro_use_guess )
       {
          pro_error = pro_rms;
       }
       else
       {
          int pro_flags = def_flags;
-         if( use_pro_guess )
+         if( pro_use_guess )
          {
             pro_flags |= CALIB_USE_INTRINSIC_GUESS;
          }
@@ -721,12 +793,22 @@ int main( int argc, char** argv ){
          
          if( enable_rational_model )
             pro_flags |= CALIB_RATIONAL_MODEL;
+
+         double t0 = curtime();
+         if(!pro_use_guess_only)
          pro_error = calibrateCamera(object_corners, projector_corners,
                                      base_pro_size, pro_K, pro_kc,
                                      pro_rvecs, pro_tvecs,
                                      pro_flags, def_tc);
          
-         printf("pro rms = %f\n",pro_error);
+         double t1 = curtime();
+         
+         int obj_pt_n = 0;
+         for (int i=0;i<object_corners.size();i++)
+         {
+             obj_pt_n += object_corners[i].size();
+         }
+         printf("pro rms = %f (took %0.1f seconds) (%d points processed @ ~%0.1f pt/s)\n",pro_error,abs(t1-t0),obj_pt_n,obj_pt_n/fmax(abs(t1-t0),0.01));
       }
       
       if( enable_stereo )
@@ -734,12 +816,20 @@ int main( int argc, char** argv ){
          // calculate stereo calibration
          int stereo_flags = CALIB_FIX_INTRINSIC | CALIB_USE_INTRINSIC_GUESS;
          
+         double t0 = curtime();
          stereo_error = stereoCalibrate( object_corners, camera_corners, projector_corners,
                                         cam_K, cam_kc, pro_K, pro_kc, base_cam_size,
                                         R,T,E,F, def_tc,stereo_flags);
+         double t1 = curtime();
                                         
-         printf("stereo rms = %f\n",stereo_error);
-         printf("HELP!\n");
+         int obj_pt_n = 0;
+         for (int i=0;i<object_corners.size();i++)
+         {
+             obj_pt_n += object_corners[i].size();
+         }
+         printf("stereo rms = %f (took %0.1f seconds) (%d points processed @ ~%0.1f pt/s)\n",stereo_error,abs(t1-t0),obj_pt_n,obj_pt_n/fmax(abs(t1-t0),0.01));
+         
+         
          // calculate stereo rectification
          int rect_flags = CALIB_ZERO_DISPARITY;
          stereoRectify(cam_K,cam_kc, pro_K,pro_kc, base_cam_size, R,T,
@@ -751,18 +841,73 @@ int main( int argc, char** argv ){
    // compute just camera calibration
    else
    {
+      printf("[cam only calib mode]\n");
       int cam_flags = def_flags;
       if( enable_rational_model )
         cam_flags |= CALIB_RATIONAL_MODEL;
       if(enable_zerotan)
+      {
          cam_flags |= CV_CALIB_ZERO_TANGENT_DIST;
+          printf("[zero tangent distance]\n");
+      }
+      if(cam_fix_pp)
+      {
+          cam_flags |= CV_CALIB_FIX_PRINCIPAL_POINT;
+          printf("[fix principal point]\n");
+      }
+      if(cam_fix_k1)
+      {
+         cam_flags |= CV_CALIB_FIX_K1;
+         printf("[fix k1]\n");
+      }
+      if(cam_fix_k2)
+      {
+         cam_flags |= CV_CALIB_FIX_K2;
+         printf("[fix k2]\n");
+      }
+      if(cam_fix_k3)
+      {
+         cam_flags |= CV_CALIB_FIX_K3;
+         printf("[fix k3]\n");
+      }
+      if(cam_fix_k4)
+      {
+         cam_flags |= CV_CALIB_FIX_K4;
+         printf("[fix k4]\n");
+      }
+      if(cam_fix_k5)
+      {
+         cam_flags |= CV_CALIB_FIX_K5;
+         printf("[fix k5]\n");
+      }
+      if(cam_fix_k6)
+      {
+         cam_flags |= CV_CALIB_FIX_K6;
+         printf("[fix k6]\n");
+      }
+      
+      double t0 = curtime();
       cam_error = calibrateCamera( pro_point_list, cam_point_list,
                                   base_cam_size, cam_K, cam_kc,
                                   cam_rvecs, cam_tvecs,
                                   cam_flags);
-
-      F = findFundamentalMat( vec_cam_matches, vec_obj_matches2d, CV_FM_RANSAC, 3., 0.99 );
-      F2 = findFundamentalMat( vec_obj_matches2d, vec_cam_matches, CV_FM_RANSAC, 3., 0.99 );
+      double t1 = curtime();
+     
+      int obj_pt_n = 0;
+      for (int i=0;i<pro_point_list.size();i++)
+      {
+          obj_pt_n += pro_point_list[i].size();
+      }
+      printf("camera rms = %f (took %0.1f seconds) (%d points processed @ ~%0.1f pt/s)\n",cam_error,abs(t1-t0),obj_pt_n,obj_pt_n/fmax(abs(t1-t0),0.01));
+       
+      if( enable_fundamental_matrix )
+      {
+          double t2 = curtime();
+          F = findFundamentalMat( vec_cam_matches, vec_obj_matches2d, CV_FM_RANSAC, 3., 0.99 );
+          F2 = findFundamentalMat( vec_obj_matches2d, vec_cam_matches, CV_FM_RANSAC, 3., 0.99 );
+          double t3 = curtime();
+          printf("fundamental matrix calculation took %0.1f seconds\n",abs(t3-t2));
+      }
 
    }
    
