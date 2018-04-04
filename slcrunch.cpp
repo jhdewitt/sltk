@@ -19,23 +19,17 @@
 #include "sl_util.h"
 
 #include <opencv2/opencv.hpp>
-//#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
+#include <opencv2/highgui/highgui.hpp>
+//#include <opencv2/core/core.hpp>
 //#include <opencv2/imgcodecs.hpp>
-
-//#include <ImfRgbaFile.h>
-//#include <ImfStringAttribute.h>
-//#include <ImfMatrixAttribute.h>
-//#include <ImfArray.h>
 
 //#include <stdio.h>
 //#include <math.h>
 //#include <string.h>
 //#include <time.h>
 //#include <stdint.h>
-
 
 using namespace cv;
 using namespace std;
@@ -63,6 +57,9 @@ static void help()
           //         "      image [..]          # sequence of images to parse\n"
           "    input_data            # input data\n"
           "                          #  - text file with a list of the images in the sequence\n"
+          "    [-red]                # process only the red   channel of input images\n"
+          "    [-green]              # process only the green channel of input images\n"
+          "    [-blue]               # process only the blue  channel of input images\n"
           "    [-m <msg>]            # message/note to attach to scan for identification\n"
           "    [-ply]                # configure ply 3d point output (disables yaml match output)\n"
           "    [-prosize <NxM>]      # specify the projector space resolution used\n"
@@ -88,6 +85,7 @@ static void help()
           "    [-f <filter>]         # apply filter for output point RGB values (median)\n"
           "    [-b <bits>]           # truncation: number of LSB in the pattern images that will be ignored\n"
           "    [-noc]                # disable point coalescing\n"
+          "    [-prefix <prefix>]    # the output filename prefix; it is appended to every output file path\n"
           "    [-o <out_map>]        # the output filename for the image/object correspondence map\n"
           "                          #     the text file can be generated with imagelist_creator\n"
           "    [-yaml|-noyaml]       # configure yaml output\n"
@@ -95,6 +93,7 @@ static void help()
           "    [-vis]                # save visualization images\n"
           "                          # default = yaml\n"
           "    [-vscl]               # set color mapping visualization scale\n"
+          "    [-vsize]              # supersample the output correspondence visualization output\n"
           "\n");
 }
 
@@ -120,10 +119,10 @@ static bool readStringList( const string& filename, vector<string>& l )
 }
 
 // parse a list file and add pathprefix to each file if needed
-static bool parseStringList( const string& filename, vector<string>& l )
+// get GCB images
+// get RGB images
+static bool parseStringList( const string& filename, vector<string>& gcb_l, vector<string>& rgb_l )
 {
-   string fn(filename);
-   
    // fail if dir
    if( is_dir( filename.c_str() ) )
    {
@@ -131,13 +130,11 @@ static bool parseStringList( const string& filename, vector<string>& l )
       return false;
    }
    
-   // fail if doesn't exist
+   // fail if file doesn't exist
    if( !file_exists(filename.c_str()) )
    {
       return false;
    }
-
-   cout << "parsing [" << filename << "]\n";
 
    string prefix;
    string fname;
@@ -156,78 +153,146 @@ static bool parseStringList( const string& filename, vector<string>& l )
    printf("\tprefix : [%s]\n",prefix.c_str());
    printf("\tfname  : [%s]\n",fname.c_str());
    
-   
-   //if( prefix != "" )
-   //{
-   //   printf("prefix valid\n");
-   //}
+   // open the file
    FileStorage fs(filename, FileStorage::READ);
-   l.resize(0);
+   gcb_l.resize(0);
+   rgb_l.resize(0);
    if( !fs.isOpened() )
       return false;
-   //FileNode n = fs.getFirstTopLevelNode();
-   FileNode gcb_images = fs["images"];
-   if( gcb_images.type() != FileNode::SEQ )
-      return false;
-   //FileNodeIterator it = n.begin(), it_end = n.end();
-   FileNodeIterator it = gcb_images.begin(), it_end = gcb_images.end();
-   for( ; it != it_end; ++it )
+   
+   cout << "parsing [" << filename << "]\n";
+
+   // first load all GRAY CODE BINARY images
+   FileNode gcb_images = fs["gcb_images"];
+   if( gcb_images.type() == FileNode::SEQ )
    {
-      // add prefix if no slash present in path
-      if( ((string)*it).find("/") == string::npos )
-      {
-         if( prefix != "" )
-            l.push_back(prefix +"/"+ (string)*it);
-         else
-            l.push_back((string)*it);
-         
-      }
-      // omit prefix if slash is present in path
-      else
-      {
-         l.push_back((string)*it);
-      }
-      cout << "[" << l[l.size()-1] << "]" <<  endl;
+       FileNodeIterator gcb_it = gcb_images.begin(), gcb_it_end = gcb_images.end();
+       for( ; gcb_it != gcb_it_end; ++gcb_it )
+       {
+          // add prefix if no slash present in path
+          if( ((string)*gcb_it).find("/") == string::npos )
+          {
+             if( prefix != "" )
+                gcb_l.push_back(prefix +"/"+ (string)*gcb_it);
+             else
+                gcb_l.push_back((string)*gcb_it);
+             
+          }
+          // omit prefix if slash is present in path
+          else
+          {
+             gcb_l.push_back((string)*gcb_it);
+          }
+          cout << "[" << gcb_l[gcb_l.size()-1] << "]" <<  endl;
+       }
    }
+   
+   // next load all RGB MONOCHROME images
+   FileNode rgb_images = fs["rgb_images"];
+   if( rgb_images.type() == FileNode::SEQ )
+   {
+       FileNodeIterator rgb_it = rgb_images.begin(), rgb_it_end = rgb_images.end();
+       for( ; rgb_it != rgb_it_end; ++rgb_it )
+       {
+          // add prefix if no slash present in path
+          if( ((string)*rgb_it).find("/") == string::npos )
+          {
+             if( prefix != "" )
+                rgb_l.push_back(prefix +"/"+ (string)*rgb_it);
+             else
+                rgb_l.push_back((string)*rgb_it);
+             
+          }
+          // omit prefix if slash is present in path
+          else
+          {
+             rgb_l.push_back((string)*rgb_it);
+          }
+          cout << "[" << rgb_l[rgb_l.size()-1] << "]" <<  endl;
+       }
+   }
+   
+   printf("gcb images : %d, rgb images: %d\n",(int)gcb_l.size(),(int)rgb_l.size());
+   
    return true;
 }
 
+Vec3b float2Gray( float t ){
+   t = fmin(fmax(t,0.f),1.f);
+   Vec3b col;
+   col[0] = (uint8_t)(255*t);
+   col[1] = (uint8_t)(255*t);
+   col[2] = (uint8_t)(255*t);
+   return col;
+}
+
 Vec3b float2Color( float t ){
-   
    float n = 4.f;
    float dt = 1.f/n;
    
    float r,g,b;
    if(t<=1.f*dt)
    {
+      // red to orange
       float c = n*(t-0.f*dt);
+      r = 1.0f;
+      g = c;
+      b = 0.f;
+   }
+   else if (t<=2.f*dt){
+      // orange to green
+      float c = n*(t-1.f*dt);
+      r = 1.0f-c;
+      g = 1.0f;
+      b = 0.f;
+   }
+   else if (t<=3.f*dt){
+      // green to cyan
+      float c = n*(t-2.f*dt);
       r = 0.f;
-      g = 0.f;
+      g = 1.0f;
       b = c;
+   }
+   else if (t<=4.f*dt){
+      // cyan to blue
+      float c = n*(t-3.f*dt);
+      r = 0.f;
+      g = 1.f-c;
+      b = 1.f;
+   }
+
+   /*
+   if(t<=1.f*dt)
+   {
+      float c = n*(t-0.f*dt);
+      r = c;
+      g = 0.f;
+      b = 0.f;
    }
    else if (t<=2.f*dt){
       float c = n*(t-1.f*dt);
-      r = 0.f;
+      r = 1.0f;
       g = c;
-      b = 1.f;
+      b = 0.f;
    }
    else if (t<=3.f*dt){
       float c = n*(t-2.f*dt);
-      r = c;
-      g = 1.f;
-      b = 1.f-c;
+      r = 1.0f-c;
+      g = 1.0f;
+      b = c;
    }
    else if (t<=4.f*dt){
       float c = n*(t-3.f*dt);
-      r = 1.f;
+      r = 0.f;
       g = 1.f-c;
-      b = 0.f;
+      b = 1.f-c*0.5;
    }
+    */
    
    Vec3b col;
-   col[0] = (uint8_t)(255*r);
+   col[0] = (uint8_t)(255*b);
    col[1] = (uint8_t)(255*g);
-   col[2] = (uint8_t)(255*b);
+   col[2] = (uint8_t)(255*r);
    
    //    if (t<=1.f*dt)
    //    {   //black -> red
@@ -361,6 +426,7 @@ int main( int argc, char** argv ) {
    //    
    int n=0;
    
+   /*
    const char* outMapFN      = findNextName( "slscan_%04d.yaml",&n); n=0;
    const char* outViscFN     = findNextName( "slscan_%04d_rgb.png",&n); n=0;
    const char* outVisxFN     = findNextName( "slscan_%04d_x.png",&n); n=0;
@@ -370,6 +436,18 @@ int main( int argc, char** argv ) {
    const char* outChessCamFN = findNextName( "slscan_%04d_chesscam.png",&n); n=0;
    const char* outChessProFN = findNextName( "slscan_%04d_chesspro.png",&n); n=0;
    const char* outPlyFN      = findNextName( "slscan_%04d.ply", &n); n=0;
+    */
+   //(char*)malloc(.
+   const char* outMapFN      = findNextName( "slscan_%04d.yaml",&n); n=0;
+   const char* outViscFN     = findNextName( "slscan_%04d_rgb.png",&n); n=0;
+   const char* outVisxFN     = findNextName( "slscan_%04d_x.png",&n); n=0;
+   const char* outVisyFN     = findNextName( "slscan_%04d_y.png",&n); n=0;
+   const char* outVisDirFN   = findNextName( "slscan_%04d_direct.png",&n); n=0;
+   const char* outVisAmbFN   = findNextName( "slscan_%04d_indirect.png",&n); n=0;
+   const char* outChessCamFN = findNextName( "slscan_%04d_chesscam.png",&n); n=0;
+   const char* outChessProFN = findNextName( "slscan_%04d_chesspro.png",&n); n=0;
+   const char* outPlyFN      = findNextName( "slscan_%04d.ply", &n); n=0;
+
    const char* outFilter = 0;
    bool rgbFilter = false;
 
@@ -377,12 +455,12 @@ int main( int argc, char** argv ) {
    const char* inChessImageFN = 0;
    int chess_idx = 23;
    
-   
-   outputMapFilename = outMapFN;
+   //outputMapFilename = outMapFN;
    
    string scanMessage;
    vector< stringmap > exifList;
-   vector< string > fileNameList;
+   vector< string > gcbFileList;
+   vector< string > rgbFileList;
    vector< Mat > imageList;
    
    //    vector< pair<string,stringmap> > image_list;
@@ -400,7 +478,13 @@ int main( int argc, char** argv ) {
    Size2i pro_size_input;
    bool enable_prosize_input = false;
 
-   
+   // rgb pattern processing
+   bool enable_rgb_pattern_processing = true;
+
+   // color channel selection
+   bool enable_monochrome_processing = false;
+   int monochrome_channel_idx = 0;
+
    // chessboard options
    bool enable_chess = false;
    Size chess_size(0,0);
@@ -437,6 +521,7 @@ int main( int argc, char** argv ) {
    float chess_scale = 1;
    int mode = DETECTION;
    float vis_scl = 1;
+   float vis_supersample = 1;
    
    int mult = 1;
    int bits = 1;
@@ -494,6 +579,33 @@ int main( int argc, char** argv ) {
             enable_coalesce = true;
             printf("enable_coalesce\n");
          }
+         // enable rgb pattern processing 
+         else if( strcmp(s,"-rgb") == 0 )
+         {
+            enable_rgb_pattern_processing = true;
+            printf("enable_rgb_pattern_processing = true\n");
+         }
+         // input monochrome red mode
+         else if( strcmp(s,"-red") == 0 )
+         {
+            enable_monochrome_processing = true;
+            monochrome_channel_idx = 2;
+            printf("enable_monochrome_processing = red\n");
+         }
+         // input monochrome green mode
+         else if( strcmp(s,"-green") == 0 )
+         {
+            enable_monochrome_processing = true;
+            monochrome_channel_idx = 1;
+            printf("enable_monochrome_processing = green\n");
+         }
+         // input monochrome blue mode
+         else if( strcmp(s,"-blue") == 0 )
+         {
+            enable_monochrome_processing = true;
+            monochrome_channel_idx = 0;
+            printf("enable_monochrome_processing = blue\n");
+         }
          // no coalesce
          else if( strcmp(s,"-noc") == 0 )
          {
@@ -537,6 +649,8 @@ int main( int argc, char** argv ) {
             // also turn off yaml output
             save_yaml = false;
             save_matches = false;
+            enable_coalesce = true;
+            printf("enable_coalesce\n");
          }
          else if( strcmp(s,"-noply") == 0 )
          {
@@ -564,7 +678,7 @@ int main( int argc, char** argv ) {
          {
             if( i+1 >= argc )
                return fprintf( stderr, "Output file name not provided\n"), -1;
-            outputMapFilename = argv[++i];
+            outPrefix = argv[++i];
          }
          else if( strcmp( s, "-m" ) == 0 )
          {
@@ -635,6 +749,16 @@ int main( int argc, char** argv ) {
                return fprintf(stderr,"Invalid color mapping visualization scale value\n"), -1;
             vis_scl = v;
          }
+         // set color mapping visualization scale
+         else if( strcmp(s,"-vscale") == 0 )
+         {
+            float v = 1;
+            if( i+1 >= argc )
+               return fprintf(stderr,"Supersample visualization output scale value not provided\n"), -1;
+            if( sscanf( argv[++i], "%f", &v) != 1 || v<=0 )
+               return fprintf(stderr,"Invalid supersample scale value\n"), -1;
+            vis_supersample = fmin(fmax(v,1.0f),10.0f);
+         }
          else if( strcmp(s,"-prosize") == 0 )
          {
             if(i+1<argc){
@@ -698,7 +822,7 @@ int main( int argc, char** argv ) {
        size_t found = filename.find_last_of("/");
        if( found == string::npos )
        {
-          prefix = "";
+          prefix = filename;
        }
        else
        {
@@ -725,7 +849,7 @@ int main( int argc, char** argv ) {
         char* outVisChessProPath = (char*)calloc(100,sizeof(char));
         char* outPlyPath         = (char*)calloc(100,sizeof(char));
 
-        sprintf(outMapPath,        filepattern, prefix.c_str(), ".yaml"); 
+        sprintf(outMapPath,        filepattern, prefix.c_str(), ".yaml");
         sprintf(outVisCPath,       filepattern, prefix.c_str(), "_rgb.png");
         sprintf(outVisXPath,       filepattern, prefix.c_str(), "_x.png");
         sprintf(outVisYPath,       filepattern, prefix.c_str(), "_y.png");
@@ -771,7 +895,7 @@ int main( int argc, char** argv ) {
       
       if( save_yaml )
       {
-         //f_yaml     = fopen(outMapFN,"w"); fclose(f_yaml);
+         f_yaml     = fopen(outMapFN,"w"); fclose(f_yaml);
       }
       
       if( save_ply )
@@ -791,24 +915,50 @@ int main( int argc, char** argv ) {
          {
             if( fn.find_last_of("/") == fn.length()-1 )
             {
-               fn_auto = fn + "list.yaml";
+               fn_auto = fn + "sequence.yaml";
             }
             else
             {
-               fn_auto = fn + "/list.yaml";
+               fn_auto = fn + "/sequence.yaml";
             }
          }
          
          printf("checking image list: %s\n", inImgListFN);
          
+         bool listLoaded = false;
+         
+         listLoaded = parseStringList(fn.c_str(), gcbFileList, rgbFileList);
+         if( listLoaded && ( gcbFileList.size() > 0 || rgbFileList.size() > 0 ) )
+         {
+            mode = CAPTURING;
+            printf("Using image list: %s\n", inImgListFN);
+         }
+         else
+         {
+             listLoaded = parseStringList( fn_auto.c_str(), gcbFileList, rgbFileList );
+             if( listLoaded && ( gcbFileList.size() > 0 || rgbFileList.size() > 0 ) )
+             {
+                mode = CAPTURING;
+                printf("Using image list: %s\n", inImgListFN);
+                inImgListFN = fn_auto.c_str();
+             }
+             else
+             {
+                // give up
+                printf("invalid image list specified, exiting..\n");
+                return 1;
+             }
+         }
+
+         /*
          // try parsing the actual path
-         if( parseStringList(fn.c_str(), fileNameList) ){
+         if( parseStringList(fn.c_str(), gcbFileList, rgbFileList) ){
             mode = CAPTURING;
             printf("Using image list: %s\n", inImgListFN);
             
          }
          // try parsing an auto-guess of path + "list.yaml"
-         else if( parseStringList( fn_auto.c_str(), fileNameList ) )
+         else if( parseStringList( fn_auto.c_str(), gcbFileList, rgbFileList ) )
          {
             inImgListFN = fn_auto.c_str();
             mode = CAPTURING;
@@ -821,6 +971,7 @@ int main( int argc, char** argv ) {
             printf("invalid image list specified, exiting..\n");
             return 1;
          }
+         */
       } else {
          printf("no file specified, exiting..\n");
          return 1;
@@ -829,7 +980,7 @@ int main( int argc, char** argv ) {
       // load exif data
       {
          printf("loading exif data..\n");
-         getExifList( fileNameList, exifList );
+         getExifList( gcbFileList, exifList );
          printf("done!\n");
       }
       
@@ -849,17 +1000,17 @@ int main( int argc, char** argv ) {
          mult = 1;
          if(show_inverse)     mult *= 2;
          if(show_x && show_y) mult *= 2;
-         bits = fileNameList.size() / mult;
+         bits = gcbFileList.size() / mult;
       }
       
       // fail if unexpected number of images
-      if( mult * bits != fileNameList.size() ){
+      if( mult * bits != gcbFileList.size() ){
          printf("invalid number of images, exiting..\n");
          return 1;
       }
       
       // fail on odd number of input images
-      if( fileNameList.size() % 2 == 1 ){
+      if( gcbFileList.size() % 2 == 1 ){
          if( show_inverse || (show_x && show_y) ){
             printf("odd number of images, exiting..\n");
             return 1;
@@ -871,16 +1022,16 @@ int main( int argc, char** argv ) {
    // ------------- program start -------------
    
    // discover image info
-   //    printf("checking image dimensions (%s).. ",fileNameList[0].c_str());
+   //    printf("checking image dimensions (%s).. ",gcbFileList[0].c_str());
    
    Mat thumb, thumb_i;
-   Mat image = imread(fileNameList[0]);
+   Mat image = imread(gcbFileList[0]);
    
    if( load_all ){
       printf("loading all images..\n");
-      for(int i=0; i<fileNameList.size(); i++){
-         Mat img = imread(fileNameList[i]);
-         printf("\t%s\n",fileNameList[i].c_str());
+      for(int i=0; i<gcbFileList.size(); i++){
+         Mat img = imread(gcbFileList[i]);
+         printf("\t%s\n",gcbFileList[i].c_str());
          imageList.push_back(img);
       }
    }
@@ -949,7 +1100,7 @@ int main( int argc, char** argv ) {
    printf("show y-axis:  %s\n", show_y ? "√" : "no" );
    printf("bits:   %2d (2^%d = %d)\n", bits, bits, (int)std::pow(2.0f,bits) );
    printf("mult:   %2d\n", mult);
-   printf("images: %2d\n", (int)fileNameList.size());
+   printf("images: %2d\n", (int)gcbFileList.size());
    printf("---------------------\n");
    printf("image size = %d x %d\n", image_size.width, image_size.height);
    printf("threshold = %d\n",diff_threshold);
@@ -999,7 +1150,7 @@ int main( int argc, char** argv ) {
    if( chess_image_input ) {
       
 //      color_chess = imread(inChessImageFN);
-      color_chess = imread(fileNameList[chess_idx]);
+      color_chess = imread(gcbFileList[chess_idx]);
       if( !color_chess.data )
       {
          return fprintf(stderr,"error loading chessboard pattern image\n"), -1;
@@ -1015,11 +1166,11 @@ int main( int argc, char** argv ) {
       
 //      imshow("chess",small_chess);
 //      waitKey(0);
-      cout << fileNameList[chess_idx] << endl;
+      cout << gcbFileList[chess_idx] << endl;
       
       printf("looking for chessboard...\n");
       chess_found = findChessboardCorners(small_chess,chess_size,chess_corners,
-                                          CALIB_CB_ADAPTIVE_THRESH | CALIB_CB_NORMALIZE_IMAGE);
+                                          CALIB_CB_ADAPTIVE_THRESH);// | CALIB_CB_NORMALIZE_IMAGE);
       
       if( chess_found ){
          printf("success\n");
@@ -1028,8 +1179,35 @@ int main( int argc, char** argv ) {
             chess_corners[i].x /= ratio;
             chess_corners[i].y /= ratio;
          }
-         cornerSubPix( gray_chess, chess_corners, Size(9,9), Size(-1,-1),
-                      TermCriteria( TermCriteria::EPS+TermCriteria::COUNT, 30, 0.1 ));
+         
+         int n = 0;
+         float avg_edge_len = 0;
+         int chx = chess_size.width;
+         int chy = chess_size.height;
+         for(int r=0; r<chy-1; r++)
+         {
+             for(int c=0; c<chx-1; c++)
+             {
+                 Point2f p1(chess_corners[r*chx+c]);
+                 Point2f pX(chess_corners[r*chx+c+1]);
+                 Point2f pY(chess_corners[(r+1)*chx+c]);
+                 float d1 = norm(p1-pX);
+                 float d2 = norm(p1-pY);
+                 avg_edge_len += d1;
+                 n++;
+                 avg_edge_len += d2;
+                 n++;
+             }
+         }
+         avg_edge_len /= n;
+         
+         int subpix_window = static_cast<int>(fmax(avg_edge_len*0.85*0.5,5));
+         printf("***** avg_edge_len = %0.4f ***** subpix_window = %d *****\n",avg_edge_len,subpix_window);
+
+         cornerSubPix( gray_chess, chess_corners, Size(subpix_window,subpix_window), Size(-1,-1),
+                      TermCriteria( TermCriteria::EPS+TermCriteria::COUNT, 500, 0.01 ));
+         //cornerSubPix( gray_chess, chess_corners, Size(5,5), Size(1,1),
+         //             TermCriteria( TermCriteria::EPS+TermCriteria::COUNT, 500, 0.025 ));
          
          drawChessboardCorners( color_chess, chess_size, Mat(chess_corners), chess_found );
          //            imshow("img",color_chess);
@@ -1121,8 +1299,8 @@ int main( int argc, char** argv ) {
                   x_pattern   = imageList[x_idx0];
                   x_pattern_i = imageList[x_idx1];
                } else {
-                  x_pattern   = imread(fileNameList[x_idx0]);
-                  x_pattern_i = imread(fileNameList[x_idx1]);
+                  x_pattern   = imread(gcbFileList[x_idx0]);
+                  x_pattern_i = imread(gcbFileList[x_idx1]);
                }
             }
             if( show_y ){
@@ -1130,8 +1308,8 @@ int main( int argc, char** argv ) {
                   y_pattern   = imageList[y_idx0];
                   y_pattern_i = imageList[y_idx1];
                } else {
-                  y_pattern   = imread(fileNameList[y_idx0]);
-                  y_pattern_i = imread(fileNameList[y_idx1]);
+                  y_pattern   = imread(gcbFileList[y_idx0]);
+                  y_pattern_i = imread(gcbFileList[y_idx1]);
                }
             }
          }
@@ -1160,8 +1338,20 @@ int main( int argc, char** argv ) {
                //    Mat row_map_gray(image_size,CV_16UC1,Scalar::all(0));
                //rgb_map_tmp Vec4f
                
+               double ret = 0;
                // decode image pair into bit
-               double ret = decodeImagePair(x_pattern, x_pattern_i, rgb_map_tmp, bit_map_tmp, 5);
+               if( enable_monochrome_processing )
+               {
+                   vector<Mat> x_chs,xi_chs;
+                   split(x_pattern,   x_chs);
+                   split(x_pattern_i,xi_chs);
+                   ret = decodeImagePair(x_chs[monochrome_channel_idx], xi_chs[monochrome_channel_idx], rgb_map_tmp, bit_map_tmp, diff_threshold);
+               }
+               else
+               {
+                   ret = decodeImagePair(x_pattern, x_pattern_i, rgb_map_tmp, bit_map_tmp, diff_threshold);
+               }
+
                
                //printf("x bit [%d] : diff = %0.3f",bitfield, ret);
                //fflush(stdout);
@@ -1183,8 +1373,22 @@ int main( int argc, char** argv ) {
             {
                //    Mat row_map_gray(image_size,CV_16UC1,Scalar::all(0));
                
+               double ret = 0;
                // decode image pair into bit
-               double ret = decodeImagePair(y_pattern, y_pattern_i, rgb_map_tmp, bit_map_tmp, 5);
+               if( enable_monochrome_processing )
+               {
+                   vector<Mat> y_chs,yi_chs;
+                   split(y_pattern,   y_chs);
+                   split(y_pattern_i,yi_chs);
+                   ret = decodeImagePair(y_chs[monochrome_channel_idx], yi_chs[monochrome_channel_idx], rgb_map_tmp, bit_map_tmp, diff_threshold);
+               }
+               else
+               {
+                   ret = decodeImagePair(y_pattern, y_pattern_i, rgb_map_tmp, bit_map_tmp, diff_threshold);
+               }
+
+               // decode image pair into bit
+               //double ret = decodeImagePair(y_pattern, y_pattern_i, rgb_map_tmp, bit_map_tmp, 5);
                
               // printf("|  y bit [%d] : diff = %0.3f\n",bitfield, ret);
                //fflush(stdout);
@@ -1379,16 +1583,16 @@ int main( int argc, char** argv ) {
 //               rgb_map_avg.at<Vec4f>(pro_pt.y,pro_pt.x) += rgb_map_x.at<Vec4f>(cam_pt.y,cam_pt.x);
 //            if( show_y )
 //               rgb_map_avg.at<Vec4f>(pro_pt.y,pro_pt.x) += rgb_map_y.at<Vec4f>(cam_pt.y,cam_pt.x);
-            float gray_value = (rgb_pt.x*1 + rgb_pt.y*2 + rgb_pt.z*1 )/(4.0f*255);
+            float gray_value = (rgb_pt.x*2 + rgb_pt.y*4 + rgb_pt.z*1 )/(7.0f*255);
             gray_value = min(max(gray_value,0.0f),1.0f);
-            gray_value = pow(gray_value,2.0f);
-
-            gray_value = 1;
+            //gray_value = pow(gray_value,2.0f);
+            //gray_value = 1;
             
             row_map_avg.at<Vec2f>(pro_pt.y,pro_pt.x) += Vec2f(cam_pt.y*gray_value,gray_value);
             col_map_avg.at<Vec2f>(pro_pt.y,pro_pt.x) += Vec2f(cam_pt.x*gray_value,gray_value);
          }
 
+         // print for debug
          for(int i=0; i<camera_points.size(); i++){
             Point2i cam_pt(static_cast<int>(camera_points[i].x),   static_cast<int>(camera_points[i].y));
             Point2i pro_pt(static_cast<int>(projector_points[i].x),static_cast<int>(projector_points[i].y));
@@ -1632,6 +1836,8 @@ int main( int argc, char** argv ) {
             resize( camchessvis_big, camchessvis, image_size, 0, 0, INTER_AREA );
             
             
+            drawChessboardCorners( prochessvis, chess_size, Mat(projector_corners), chess_found );
+            if(false){
             // draw chess points and connecting lines
             for(int i=0; i<projector_corners.size(); i++){
                Scalar col(0,0,255);
@@ -1651,6 +1857,7 @@ int main( int argc, char** argv ) {
                //                line(prochessvis,p-dx*s,p+dx*s,col2,1);
                //                line(prochessvis,p-dy*s,p+dy*s,col2,1);
             }
+         }
             
             //            cvtColor(camchessvis_alt,camchessvis_gray,COLOR_BGR2GRAY);
             
@@ -1779,11 +1986,11 @@ int main( int argc, char** argv ) {
       
       // write point pair YAML file
       if( save_yaml && !enable_mapload ){
-         cout << "writing file: " << outputMapFilename << endl;
+         cout << "writing file: " << outMapFN << endl;
          
          // open file
          FileStorage fs;
-         fs.open(outputMapFilename, FileStorage::WRITE);
+         fs.open(outMapFN, FileStorage::WRITE);
          
          string cam_make = checkExifMap( exifList[0], "Make" );
          string cam_model = checkExifMap( exifList[0], "Model" );
@@ -1917,14 +2124,17 @@ int main( int argc, char** argv ) {
          if( show_x ){
             // create preview image
             Mat vis_img;
+            Size2i super_size;
+            super_size.width  = (int)(image_size.width  * vis_supersample);
+            super_size.height = (int)(image_size.height * vis_supersample);
             
-            vis_img.create(image_size,CV_8UC3);
+            vis_img.create(super_size,CV_8UC3);
             vis_img.setTo(Scalar::all(32));
             
             // only process decoded points
             for(int i=0; i<c_pts->size(); i++){
                Point2f obj_idx = (*p_pts)[i];
-               Point2i img_idx((int)((*c_pts)[i].x),(int)((*c_pts)[i].y));
+               Point2i img_idx((int)((*c_pts)[i].x * vis_supersample),(int)((*c_pts)[i].y * vis_supersample));
                uchar* pix = vis_img.ptr<uchar>(img_idx.y);
                int x = img_idx.x;
                
@@ -1953,19 +2163,24 @@ int main( int argc, char** argv ) {
          if( show_y ){
             // create preview image
             Mat vis_img;
+            Size2i super_size;
+            super_size.width  = (int)(image_size.width  * vis_supersample);
+            super_size.height = (int)(image_size.height * vis_supersample);
             
-            vis_img.create(image_size,CV_8UC3);
+            vis_img.create(super_size,CV_8UC3);
             vis_img.setTo(Scalar::all(32));
             
             // only process decoded points
             for(int i=0; i<c_pts->size(); i++){
                Point2f obj_idx = (*p_pts)[i];
-               Point2i img_idx((int)((*c_pts)[i].x),(int)((*c_pts)[i].y));
+               Point2i img_idx((int)((*c_pts)[i].x * vis_supersample),(int)((*c_pts)[i].y * vis_supersample));
                uchar* pix = vis_img.ptr<uchar>(img_idx.y);
                int x = img_idx.x;
                
                // output
-               float t = obj_idx.y / (float)y_max;
+               //float t = obj_idx.y / (float)y_max;
+               float t = (obj_idx.y-y_min) / (float)(y_max-y_min);
+               
                t *= vis_scl;
                if(t>1.0)
                   t-=floor(t);
@@ -2156,14 +2371,14 @@ int main( int argc, char** argv ) {
          printf("***********************************\n");
          printf("camera_points_rgb_avg.size = %d\n",(int)camera_points_rgb_avg.size());
          if(DBUG)
-         for(int i=0; i<100; i++)
+         for(int i=0; i<25; i++)
          {
             Point3f pt = camera_points_rgb_avg[i];
             printf("\t[%d] = (%f,%f,%f)\n", i, pt.x,pt.y,pt.z);
          }
          printf("rgbPoints.size = %d\n", (int)rgbPoints.size());
          if(DBUG)
-         for(int i=0; i<100; i++)
+         for(int i=0; i<25; i++)
          {
             Vec3b pt = rgbPoints[i];
             printf("\t[%d] = (%d,%d,%d)\n", i, pt[0],pt[1],pt[2]);
