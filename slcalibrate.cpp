@@ -817,9 +817,19 @@ int main( int argc, char** argv ){
          int stereo_flags = CALIB_FIX_INTRINSIC | CALIB_USE_INTRINSIC_GUESS;
          
          double t0 = curtime();
+         
+#if CV_MAJOR_VERSION == 3
          stereo_error = stereoCalibrate( object_corners, camera_corners, projector_corners,
                                         cam_K, cam_kc, pro_K, pro_kc, base_cam_size,
-                                        R,T,E,F, def_tc,stereo_flags);
+                                        R,T,E,F, stereo_flags, def_tc);
+#endif
+
+#if CV_MAJOR_VERSION == 2
+                      stereo_error = stereoCalibrate( object_corners, camera_corners, projector_corners,
+                                        cam_K, cam_kc, pro_K, pro_kc, base_cam_size,
+                                        R,T,E,F, def_tc, stereo_flags);
+#endif
+
          double t1 = curtime();
                                         
          int obj_pt_n = 0;
