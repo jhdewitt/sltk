@@ -1,10 +1,9 @@
-#define SERVER_CONTROL_ADDRESS "0.0.0.0"
-#define SERVER_DISPLAY_ADDRESS "0.0.0.0"
-#define SERVER_CAMERA_ADDRESS "0.0.0.0"
-#define SERVER_SERIAL_ADDRESS "0.0.0.0"
+#define SERVER_DISPLAY_PORT    "4021"      // to display server (computer attached to graphics out)
 
-#define SERVER_CAMERA_PORT  "4002" // from client for image capture
-#define CLIENT_CAMERA_PORT  "4012"
+#define SERVER_CONTROL_ADDRESS "0.0.0.0" // slcapture.py
+#define SERVER_CONTROL_PORT    "4010"    // to slcapture.py (control program)
+#define CLIENT_CONTROL_PORT    "4011"    // to slcontrol processing sketch (GUI)
 
-#define CLIENT_SERIAL_PORT  "4013"
-#define SERVER_SERIAL_PORT  "4003" // from client for stepper motor control
+#define SERVER_SERIAL_ADDRESS "0.0.0.0" // slturn
+#define SERVER_SERIAL_PORT    "4040"    // to slcapture.py
+#define CLIENT_SERIAL_PORT    "4041"    // to slturn

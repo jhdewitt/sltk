@@ -36,13 +36,14 @@ float STEP_PER_DEG = 5.8845029123241;
 void setup() {
   START_T = millis()+2000;
   size(600, 450);
+//  size(600, 260);
   frameRate(desired_fps);
 
   //size(512, 200);
   PFont font = createFont("arial", 20);
   oscP5 = new OscP5(this, 4011);
-  remoteControl   = new NetAddress("127.0.0.1", 4010);
-  remoteDisplay   = new NetAddress("127.0.0.1", 4021);
+  remoteControl   = new NetAddress("10.0.1.212", 4010);
+  remoteDisplay   = new NetAddress("10.0.1.212", 4021);
   //remoteTurntable = new NetAddress("127.0.0.1", 4013);
   noStroke();
 
@@ -386,7 +387,7 @@ void setup() {
               ;
   px = px + 10 + button_width;
 
-/*
+
   cp5.addSlider("SIN_FREQ")
     .setPosition(px, py)
       .setSize(300, 25)
@@ -408,7 +409,7 @@ void setup() {
                 .setColorActive(color(255, 255, 255, 100))
                   .setDecimalPrecision(2)
                     .setLock(false);
-  */
+  
 
   //total_degrees(scanN*turnN);
   cp5.get(Numberbox.class, "total_degrees").setValue(scanN*turnN);

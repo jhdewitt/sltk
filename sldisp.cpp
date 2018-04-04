@@ -669,8 +669,10 @@ int main(int argc, char *argv[])
     
     lo_server_thread_start(st);
     
-    // test sending display info packet
+    // slcapture.py
     lo_address t = lo_address_new(SERVER_CONTROL_ADDRESS, SERVER_CONTROL_PORT);
+    
+    // test sending display info packet
     if (send_display_info(t, 1920,1080) == -1) {
         printf("OSC error %d: %s\n", lo_address_errno(t), lo_address_errstr(t));
     }

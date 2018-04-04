@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
     lo_server_thread_add_method(st, "/turn", "ii", turn_request_handler, NULL);
 
     lo_server_thread_start(st);
-    lo_address t = lo_address_new("10.0.1.105", SERVER_SERIAL_PORT);
+    lo_address t = lo_address_new(SERVER_CONTROL_ADDRESS, SERVER_SERIAL_PORT);
     
     signal(SIGINT,ctrlc);
     printf("Listening on TCP port %s\n", CLIENT_SERIAL_PORT);
@@ -228,8 +228,8 @@ void pushTurnCommand( CLIENT_STATE *st, int dir, int steps )
         steps = 16*10;
     }
     
-    if (steps > 2<<16-1)
-        steps = 2<<16-1;
+    if (steps > (2<<16)-1)
+        steps = (2<<16)-1;
     st->obuf[0] = dir;
     st->obuf[1] = (steps>>8) & 0xFF; // msb
     st->obuf[2] = steps & 0xFF; // lsb

@@ -159,7 +159,8 @@ cv::Mat get_direct_global(const std::vector<cv::Mat>& images, float b)
 }
 
 
-// input: 2x 8UC3, one image of binary pattern, one image of binary pattern inverse/complement
+// Gray Code Binary Decoding
+// input: 2x 8UC3, 1 image of binary pattern, 1 image of binary pattern inverse/complement
 // output 1x 8UC1, of per-pixel decoded bitfield
 // output 1x 32FC4, of per-pixel observed color (accumulates)
 double decodeImagePair( Mat &src,
@@ -170,55 +171,119 @@ double decodeImagePair( Mat &src,
 {
    double diff_tot = 0;
    int diff_n = 0;
-
-   for(int r=0; r<src.rows; r++)
+   
+   int ch_src = src.channels();
+   int ch_inv = inv.channels();
+   if(ch_src!=ch_inv)
    {
-      const Vec3b* src_px = src.ptr<Vec3b>(r);
-      const Vec3b* inv_px = inv.ptr<Vec3b>(r);
-      Vec4f* rgb_px = out_rgb.ptr<Vec4f>(r);
-      uchar* bit_px = out_bit.ptr<uchar>(r);
-      
-      for(int c=0; c<src.cols; c++)
-      {
-         int gray0 = (int)(0.299*src_px[c][2] + 0.587*src_px[c][1] + 0.114*src_px[c][0]);
-         int gray1 = (int)(0.299*inv_px[c][2] + 0.587*inv_px[c][1] + 0.114*inv_px[c][0]);
-         int diff = gray0 - gray1;
-         
-         // found signal
-         if( abs(diff) > threshold ){
-            
-            diff_tot += abs(diff);
-            diff_n++;
-            
-            // (first pattern brighter) : white / 1
-            if( diff > 0 ){
-               bit_px[c] = 255;
-//               rgb_px[c] = src_px[c];
-               rgb_px[c][0] += src_px[c][0];
-               rgb_px[c][1] += src_px[c][1];
-               rgb_px[c][2] += src_px[c][2];
-               rgb_px[c][3] += 1;
+       printf("decodeImagePair error: channel number mismatch for input images [%d],[%d]\n",ch_src,ch_inv);
+       return -1;
+   }
 
-            }
-            
-            // (second pattern brighter) : black / 0
-            if( diff < 0 ){
-               bit_px[c] = 0;
-//               rgb_px[c] = inv_px[c];
-               rgb_px[c][0] += inv_px[c][0];
-               rgb_px[c][1] += inv_px[c][1];
-               rgb_px[c][2] += inv_px[c][2];
-               rgb_px[c][3] += 1;
+   // rgb image input (convert each pixel triplet into monochrome)
+   if(ch_src == 3)
+   {
+       for(int r=0; r<src.rows; r++)
+       {
 
-            }
-            
-         } else {
-            // set to "invalid" sentinel value 128
-            bit_px[c] = 128;
-            
-         }
-         
-      }
+          const Vec3b* src_px = src.ptr<Vec3b>(r);
+          const Vec3b* inv_px = inv.ptr<Vec3b>(r);
+          Vec4f* rgb_px = out_rgb.ptr<Vec4f>(r);
+          uchar* bit_px = out_bit.ptr<uchar>(r);
+          
+          for(int c=0; c<src.cols; c++)
+          {
+             int gray0 = (int)(0.299*src_px[c][2] + 0.587*src_px[c][1] + 0.114*src_px[c][0]);
+             int gray1 = (int)(0.299*inv_px[c][2] + 0.587*inv_px[c][1] + 0.114*inv_px[c][0]);
+             int diff = gray0 - gray1;
+             
+             // found signal
+             if( abs(diff) > threshold ){
+                
+                diff_tot += abs(diff);
+                diff_n++;
+                
+                // (first pattern brighter) : white / 1
+                if( diff > 0 ){
+                   bit_px[c] = 255;
+    //               rgb_px[c] = src_px[c];
+                   rgb_px[c][0] += src_px[c][0];
+                   rgb_px[c][1] += src_px[c][1];
+                   rgb_px[c][2] += src_px[c][2];
+                   rgb_px[c][3] += 1;
+
+                }
+                
+                // (second pattern brighter) : black / 0
+                if( diff < 0 ){
+                   bit_px[c] = 0;
+    //               rgb_px[c] = inv_px[c];
+                   rgb_px[c][0] += inv_px[c][0];
+                   rgb_px[c][1] += inv_px[c][1];
+                   rgb_px[c][2] += inv_px[c][2];
+                   rgb_px[c][3] += 1;
+
+                }
+                
+             } else {
+                // set to "invalid" sentinel value 128
+                bit_px[c] = 128;
+                
+             }
+             
+          }
+       }
+   }
+   // monochrome image input
+   else if(ch_src == 1)
+   {
+       for(int r=0; r<src.rows; r++)
+       {
+          const uchar* src_px = src.ptr<uchar>(r);
+          const uchar* inv_px = inv.ptr<uchar>(r);
+          Vec4f* rgb_px = out_rgb.ptr<Vec4f>(r);
+          uchar* bit_px = out_bit.ptr<uchar>(r);
+          
+          for(int c=0; c<src.cols; c++)
+          {
+             int gray0 = src_px[c];
+             int gray1 = inv_px[c];
+             int diff = gray0 - gray1;
+             
+             // found signal
+             if( abs(diff) > threshold ){
+                
+                diff_tot += abs(diff);
+                diff_n++;
+                
+                // (first pattern brighter) : white / 1
+                if( diff > 0 ){
+                   bit_px[c] = 255;
+                   rgb_px[c][0] += src_px[c];
+                   rgb_px[c][1] += src_px[c];
+                   rgb_px[c][2] += src_px[c];
+                   rgb_px[c][3] += 1;
+
+                }
+                
+                // (second pattern brighter) : black / 0
+                if( diff < 0 ){
+                   bit_px[c] = 0;
+                   rgb_px[c][0] += inv_px[c];
+                   rgb_px[c][1] += inv_px[c];
+                   rgb_px[c][2] += inv_px[c];
+                   rgb_px[c][3] += 1;
+
+                }
+                
+             } else {
+                // set to "invalid" sentinel value 128
+                bit_px[c] = 128;
+                
+             }
+             
+          }
+       }
    }
    
    if(diff_n>0)
