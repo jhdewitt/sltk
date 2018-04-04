@@ -10,7 +10,7 @@
 # sldisp.cpp
 # slturn.cpp
 
-OS = LINUX
+#OS = LINUX
 #OS = MACOSX
 #OS = WINDOWS
 
@@ -52,10 +52,10 @@ else
     endif
 endif
 
-process_tools: slcrunch slcalibrate plotlens plyalign plytrim chessgen chessfind listcreator
-capture_tools: sldisp
-
-all: process_tools capture_tools
+main_tools: sldisp slcrunch slcalibrate plotlens chessgen chessfind listcreator
+ply_tools: plyalign plytrim plymerge
+	
+all: main_tools
 
 bin:
 	@mkdir -p bin
@@ -64,34 +64,34 @@ slturn: bin slturn.cpp hid.o
 	$(CC) $(CFLAGS) $(CLIB) $(SYSARG) $(HID) $(FLAGS_OSC) slturn.cpp -o bin/slturn
 
 sldisp: bin sldisp.cpp util.o
-	$(CC) $(CFLAGS) $(CLIB) $(FLAGS_GL) sldisp.cpp util.cpp -o bin/sldisp $(FLAGS_SDL) $(FLAGS_OSC)
+	$(CC) $(CFLAGS) $(CLIB) sldisp.cpp util.cpp -o bin/sldisp $(FLAGS_SDL) $(FLAGS_OSC) $(FLAGS_GL)
 
 slcrunch: bin slcrunch.cpp util.o sl_util.o
-	$(CC) $(CFLAGS) $(CLIB) $(FLAGS_OPENCV) slcrunch.cpp util.cpp sl_util.cpp -o bin/slcrunch
+	$(CC) slcrunch.cpp util.cpp sl_util.cpp -o bin/slcrunch $(CFLAGS) $(CLIB) $(FLAGS_OPENCV) 
 
 slcalibrate: bin slcalibrate.cpp util.o
-	$(CC) $(CFLAGS) $(CLIB) $(FLAGS_OPENCV) slcalibrate.cpp util.cpp -o bin/slcalibrate
+	$(CC) slcalibrate.cpp util.cpp -o bin/slcalibrate $(CFLAGS) $(CLIB) $(FLAGS_OPENCV)
 
 plotlens: bin plotlens.cpp util.o sl_util.o
-	$(CC) $(CFLAGS) $(CLIB) $(FLAGS_OPENCV) plotlens.cpp util.cpp sl_util.cpp -o bin/plotlens
+	$(CC) plotlens.cpp util.cpp sl_util.cpp -o bin/plotlens $(CFLAGS) $(CLIB) $(FLAGS_OPENCV)
 
 plyalign: bin plyalign.cpp util.o sl_util.o
-	$(CC) $(CFLAGS) $(CLIB) $(FLAGS_VTK) $(FLAGS_EIGEN) $(FLAGS_PCL) $(FLAGS_OPENCV) $(FLAGS_FLANN) $(FLAGS_BOOST) plyalign.cpp util.cpp sl_util.cpp -o bin/plyalign
+	$(CC) plyalign.cpp util.cpp sl_util.cpp -o bin/plyalign $(CFLAGS) $(CLIB) $(FLAGS_VTK) $(FLAGS_EIGEN) $(FLAGS_PCL) $(FLAGS_OPENCV) $(FLAGS_FLANN) $(FLAGS_BOOST)
 
 plytrim: bin plytrim.cpp util.o sl_util.o
-	$(CC) $(CFLAGS) $(CLIB) $(FLAGS_VTK) $(FLAGS_EIGEN) $(FLAGS_PCL) $(FLAGS_OPENCV) $(FLAGS_FLANN) $(FLAGS_BOOST) plytrim.cpp util.cpp sl_util.cpp -o bin/plytrim
+	$(CC) plytrim.cpp util.cpp sl_util.cpp -o bin/plytrim $(CFLAGS) $(CLIB) $(FLAGS_VTK) $(FLAGS_EIGEN) $(FLAGS_PCL) $(FLAGS_OPENCV) $(FLAGS_FLANN) $(FLAGS_BOOST) 
 
 plymerge: bin plymerge.cpp util.o sl_util.o
-	$(CC) $(CFLAGS) $(CLIB) $(FLAGS_EIGEN) $(FLAGS_PCL) $(FLAGS_OPENCV) $(FLAGS_FLANN) $(FLAGS_BOOST) plymerge.cpp util.cpp sl_util.cpp -o bin/plymerge
+	$(CC) plymerge.cpp util.cpp sl_util.cpp -o bin/plymerge $(CFLAGS) $(CLIB) $(FLAGS_EIGEN) $(FLAGS_PCL) $(FLAGS_OPENCV) $(FLAGS_FLANN) $(FLAGS_BOOST)
 
 chessgen: bin chessgen.cpp util.o
-	$(CC) $(CFLAGS) $(CLIB) $(FLAGS_OPENCV) chessgen.cpp util.cpp -o bin/chessgen
+	$(CC) chessgen.cpp util.cpp -o bin/chessgen $(CFLAGS) $(CLIB) $(FLAGS_OPENCV)
 
 chessfind: bin chessfind.cpp util.o
-	$(CC) $(CFLAGS) $(CLIB) $(FLAGS_OPENCV) chessfind.cpp util.cpp -o bin/chessfind
+	$(CC) chessfind.cpp util.cpp -o bin/chessfind $(CFLAGS) $(CLIB) $(FLAGS_OPENCV)
 	
 listcreator: bin listcreator.cpp
-	$(CC) $(CFLAGS) $(CLIB) $(FLAGS_OPENCV) listcreator.cpp -o bin/listcreator
+	$(CC) listcreator.cpp -o bin/listcreator $(CFLAGS) $(CLIB) $(FLAGS_OPENCV) 
 
 #hid.o: hid_$(OS).c hid.h
 hid.o: $(HID) hid.h
@@ -104,7 +104,7 @@ sl_util.o: sl_util.cpp sl_util.h
 	$(CC) -c -o sl_util.o sl_util.cpp
 
 clean:
-	rm util.o sl_util.o
-	rm bin/slturn bin/sldisp bin/slcrunch bin/slcalibrate bin/plotlens bin/plyalign bin/plytrim bin/chessgen bin/chessfind bin/listcreator
+	rm -f util.o sl_util.o
+	rm -f bin/slturn bin/sldisp bin/slcrunch bin/slcalibrate bin/plotlens bin/plyalign bin/plytrim bin/chessgen bin/chessfind bin/listcreator
 	rmdir bin
 
