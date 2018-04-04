@@ -1,4 +1,4 @@
-#!/usr/local/opt/python/libexec/bin/python
+#!/usr/bin/python
 # sl_control.py
 # display structured light patterns via OSC
 # capture images via mjpeg-streamer
